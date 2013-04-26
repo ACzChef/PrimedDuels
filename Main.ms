@@ -1,8 +1,10 @@
+include('util/util.msa')
+
 bind(entity_damage_player, null, null, @event,
     #Entity ID (EX: id of the arrow)
     @id = @event['id']
     
-    #fetch damage
+    #fetch 
     @damage = @event['amount']
     
     #fetch attacker
@@ -12,25 +14,26 @@ bind(entity_damage_player, null, null, @event,
     }
     
     #fetch target
-    @target = @event['player']
+    @target = @event['player']damage
 
-    @inbattleAttacker = import('combat.battle.' .@attacker)
-    @inbattleTarget = import('combat.battle.' .@target)
+    @inbattleAttacker = _get_battleStatus(@attacker)
+    @inbattleTarget = _get_battleStatus(@target)
     msg(@inbattleAttacker @inbattleTarget)
     if(@inbattleAttacker == '' || is_null(@inbattleAttacker)) {
         if(@inbattleTarget == '' || is_null(@inbattleTarget)) {
             @attackerAttackTime = time()
-            @targetAttackTime = import('combat.time.'. @target. '.' .@attacker)
+            @targetAttackTime = _get_attackTime(@attacker, @target)
             if(is_numeric(@targetAttackTime) && ((@attackerAttackTime - @targetAttackTime) / 1000 < 60)) {
                 #initiate battle and reset battle times to prevent unwanted rematches
-                export('combat.battle.' .@attacker, @target)
-                export('combat.battle.' .@target, @attacker)
+                _store_battleStatus(@attacker, @target)
+                _store_battleStatus(@target, @attacker)
                 export('combat.time.'. @target. '.' .@attacker, '')
-                export('combat.time.'. @attacker. '.' .@target, '')
+                _reset_attackTime(@attacker, @target)
+                _reset_attackTime(@target, @attacker)
 
                 broadcast(@attacker. ' and ' .@target. ' are battling!')
             } else {
-                export('combat.time.'. @attacker. '.' .@target, time())
+                _store_attackTime(@attacker, @target)
                 tmsg(@target, @attacker. ' would like to battle, attack back if you accept.')
             }
             cancel()
@@ -49,24 +52,25 @@ bind(entity_damage_player, null, null, @event,
 
 
 bind(player_quit, null, null, @event,
-@player = @event['player']
-@inBattle = import('combat.battle.' .@player)
-if(@inBattle != ''){
-        export('combat.battle.' .@player, '')
-        export('combat.battle.' .@inBattle, '')
+    @player = @event['player']
+    @inBattle = _get_battleStatus(@player)
+    if(@inBattle != ''){
+        _store_battleStatus('', @inBattle)
+        _store_battleStatus('', @player)
         broadcast(@player. ' has quit in the middle of a battle. Therefor making ' .@inBattle. ' the winner!')
-#test what killing the player does
+
+        #test what killing the player does
         kill(player())
     }
 )
 
 
 bind(player_death, null, null, @event,
-@player = @event['player']
-@inBattle = import('combat.battle.' .@player)
-if(@inBattle != ''){
-        export('combat.battle.' .@player, '')
-        export('combat.battle.' .@inBattle, '')
+    @player = @event['player']
+    @inBattle = _get_battleStatus(@player)
+    if(@inBattle != ''){
+        _store_battleStatus('', @player)
+        _store_battleStatus('', @inBattle)
         broadcast(@player. ' has died, ' .@inBattle. ' Has won the battle!')
     }
 )
