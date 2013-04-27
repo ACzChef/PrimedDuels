@@ -8,6 +8,8 @@ bind(entity_damage_player, null, null, @event,
 
     @target = @event['player']
 
+    _store_attackTime(@attacker, @target)
+
     @attackerDuelOponent = _get_duelOponent(@attacker)
     @targetDuelOponent = _get_duelOponent(@target)
     if(@attackerDuelOponent == '' || is_null(@attackerDuelOponent)) {
@@ -42,11 +44,15 @@ bind(entity_damage_player, null, null, @event,
 bind(player_quit, null, null, @event,
     @player = @event['player']
     @duelOponent = _get_duelOponent(@player)
+    @attackerAttackTime = _get_attackTime(@player, @duelOponent)
+    @oponentAttackTime = _get_attackTime(@duelOponent, @player)
     if(@duelOponent != ''){
         _store_duelOponent('', @duelOponent)
         _store_duelOponent('', @player)
-        broadcast(_format(@player. ' has quit in the middle of a duel. Therefor making ' .@duelOponent. ' the winner!', 'notification'))
-        kill(@player)
+        if(@attackerAttackTime / 1000 < 15 || @oponentAttackTime / 1000 < 15) {
+            broadcast(_format(@player. ' has quit in the middle of a duel. Therefor making ' .@duelOponent. ' the winner!', 'notification'))
+            kill(@player)
+        }
     }
 )
 

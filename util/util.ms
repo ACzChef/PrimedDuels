@@ -1,20 +1,32 @@
 proc(_store_duelOponent, @data, @player,
 	export('aczchef.primedduels.duel.' .@player, @data)
 )
-
 proc(_get_duelOponent, @player,
 	return(import('aczchef.primedduels.duel.' .@player))
 )
 
+
+proc(get_attackTime, @attacker, @target,
+	return(import('aczchef.primedduels.time.attack.' .@attacker. '.' .@target)
+)
+proc(store_attackTime, @attacker, @target,
+	export('aczchef.primedduels.time.attack.' .@attacker. '.' .@target, time())
+)
+proc(_reset_attackTime, @attacker, @target,
+	export('aczchef.primedduels.time.attack.' .@attacker. '.' .@target, '')
+)
+
+
 proc(_get_requestTime, @attacker, @target,
-	return(import('aczchef.primedduels.time.' .@attacker. '.' .@target))
+	return(import('aczchef.primedduels.time.request' .@attacker. '.' .@target))
 )
 proc(_store_requestTime, @attacker, @target,
-	export('aczchef.primedduels.time.' .@attacker. '.' .@target, time())
+	export('aczchef.primedduels.time.request' .@attacker. '.' .@target, time())
 )
 proc(_reset_requestTime, @attacker, @target,
-	export('aczchef.primedduels.time.' .@attacker. '.' .@target, '')
+	export('aczchef.primedduels.time.request' .@attacker. '.' .@target, '')
 )
+
 
 proc(_format, @message, @type,
 	@type = to_lower(@type)
