@@ -1,50 +1,38 @@
-include('util/util.msa')
+include('util/util.ms')
 
 bind(entity_damage_player, null, null, @event,
-    #Entity ID (EX: id of the arrow)
-    @id = @event['id']
-    
-    #fetch 
-    @damage = @event['amount']
-    
-    #fetch attacker
     @attacker = @event['data']
     if(!ponline(@attacker)) {
         die()
     }
-    
-    #fetch target
-    @target = @event['player']damage
 
-    @inbattleAttacker = _get_battleStatus(@attacker)
-    @inbattleTarget = _get_battleStatus(@target)
-    msg(@inbattleAttacker @inbattleTarget)
-    if(@inbattleAttacker == '' || is_null(@inbattleAttacker)) {
-        if(@inbattleTarget == '' || is_null(@inbattleTarget)) {
-            @attackerAttackTime = time()
-            @targetAttackTime = _get_attackTime(@attacker, @target)
-            if(is_numeric(@targetAttackTime) && ((@attackerAttackTime - @targetAttackTime) / 1000 < 60)) {
-                #initiate battle and reset battle times to prevent unwanted rematches
-                _store_battleStatus(@attacker, @target)
-                _store_battleStatus(@target, @attacker)
-                export('combat.time.'. @target. '.' .@attacker, '')
+    @target = @event['player']
+
+    @attackerDuelOponent = _get_duelOponent(@attacker)
+    @targetDuelOponent = _get_duelOponent(@target)
+    if(@attackerDuelOponent == '' || is_null(@attackerDuelOponent)) {
+        if(@TargetDuelOponent == '' || is_null(@TargetDuelOponent)) {
+            @attackerAttackTime = _get_attackTime(@attacker, @target)
+            @targetAttackTime = _get_attackTime(@target, @attacker)
+            if(is_numeric(@targetAttackTime) && ((time() - @targetAttackTime) / 1000 < 60)) {
+                _store_duelOponent(@attacker, @target)
+                _store_duelOponent(@target, @attacker)
                 _reset_attackTime(@attacker, @target)
                 _reset_attackTime(@target, @attacker)
 
-                broadcast(@attacker. ' and ' .@target. ' are battling!')
-            } else {
+                broadcast(_format(@attacker. ' and ' .@target. ' are now in a duel!', notification))
+            } else if(!is_numeric(@attackerAttackTime) || (time() - @attackerAttackTime) / 1000 > 30) {
                 _store_attackTime(@attacker, @target)
-                tmsg(@target, @attacker. ' would like to battle, attack back if you accept.')
+                tmsg(@target, _format(@attacker. ' would like to duel, attack back if you accept.', 'notification'))
             }
             cancel()
-            # record here that @attacker has attacked @target
         } else {
-            tmsg(@attacker, @target. 'is already in battle please wait.')
+            tmsg(@attacker, _format(@target. 'is already in a duel please wait.', 'notification'))
             cancel()
         }
     } else {
-       if(@target != @inbattleAttacker) {
-           tmsg(@attacker, 'you can\'t attack other players while in battle with ' .@inbattleAttacker)
+       if(@target != @attackerDuelOponent) {
+           tmsg(@attacker, _format('you can\'t attack other players while in a duel with ' .@attackerDuelOponent, 'notification'))
            cancel()
         }
     }
@@ -53,24 +41,23 @@ bind(entity_damage_player, null, null, @event,
 
 bind(player_quit, null, null, @event,
     @player = @event['player']
-    @inBattle = _get_battleStatus(@player)
-    if(@inBattle != ''){
-        _store_battleStatus('', @inBattle)
-        _store_battleStatus('', @player)
-        broadcast(@player. ' has quit in the middle of a battle. Therefor making ' .@inBattle. ' the winner!')
-
-        #test what killing the player does
-        kill(player())
+    @duelOponent = _get_duelOponent(@player)
+    if(@duelOponent != ''){
+        _store_duelOponent('', @duelOponent)
+        _store_duelOponent('', @player)
+        broadcast(_format(@player. ' has quit in the middle of a duel. Therefor making ' .@duelOponent. ' the winner!', 'notification'))
+        kill(@player)
     }
 )
 
 
 bind(player_death, null, null, @event,
     @player = @event['player']
-    @inBattle = _get_battleStatus(@player)
-    if(@inBattle != ''){
-        _store_battleStatus('', @player)
-        _store_battleStatus('', @inBattle)
-        broadcast(@player. ' has died, ' .@inBattle. ' Has won the battle!')
+    @duelOponent = _get_duelOponent(@player)
+    if(@duelOponent != ''){
+        _store_duelOponent('', @player)
+        _store_duelOponent('', @duelOponent)
+        broadcast(_format(@player. ' has died, ' .@duelOponent. ' Has won the duel!', notification))
+        modify_event('death_message', null)
     }
 )

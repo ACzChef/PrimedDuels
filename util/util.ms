@@ -1,20 +1,28 @@
-proc(_store_battleStatus, @data, @player,
-	export('combat.battle.' .@player, @data)
+proc(_store_duelOponent, @data, @player,
+	export('aczchef.primedduels.duel.' .@player, @data)
 )
 
-proc(_get_battleStatus, @player,
-	return(import('combat.battle.' .@player))
+proc(_get_duelOponent, @player,
+	return(import('aczchef.primedduels.duel.' .@player))
 )
 
-proc(get_attackTime, @attacker, @target,
-	return(import('combat.time.' .@attacker. '.' .@target))
-
+proc(_get_attackTime, @attacker, @target,
+	return(import('aczchef.primedduels.time.' .@attacker. '.' .@target))
 )
-proc(store_attackTime, @attacker, @target,
-	export('combat.time.' .@attacker. '.' .@target, time())
-
+proc(_store_attackTime, @attacker, @target,
+	export('aczchef.primedduels.time.' .@attacker. '.' .@target, time())
 )
-proc(reset_attackTime, @attacker, @target,
-	export('combat.time.' .@attacker. '.' .@vicitm, '')
+proc(_reset_attackTime, @attacker, @target,
+	export('aczchef.primedduels.time.' .@attacker. '.' .@target, '')
+)
 
+proc(_format, @message, @type,
+	@type = to_lower(@type)
+	if(@type == 'success') {
+		return(color('Dark_Green'). '[' .color('Green'). 'Primed Duel' .color('Dark_Green'). ']' color('Green'). '»' color('White'). @message)
+	} else if(@type == 'error') {
+		return(color('Dark_red'). '[' .color('Red'). 'Primed Duel' .color('Dark_Red'). ']' color('Red'). '»' color('White'). @message)
+	} else if(@type == 'notification') {
+		return(color('Blue'). '[' .color('Yellow'). 'Primed Duel' .color('Blue'). ']' color('Yellow'). '»' color('White'). @message)
+	}
 )
