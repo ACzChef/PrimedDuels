@@ -12,17 +12,17 @@ bind(entity_damage_player, null, null, @event,
     @targetDuelOponent = _get_duelOponent(@target)
     if(@attackerDuelOponent == '' || is_null(@attackerDuelOponent)) {
         if(@TargetDuelOponent == '' || is_null(@TargetDuelOponent)) {
-            @attackerAttackTime = _get_attackTime(@attacker, @target)
-            @targetAttackTime = _get_attackTime(@target, @attacker)
-            if(is_numeric(@targetAttackTime) && ((time() - @targetAttackTime) / 1000 < 60)) {
+            @attackerRequestTime = _get_requestTime(@attacker, @target)
+            @targetRequestTime = _get_requestTime(@target, @attacker)
+            if(is_numeric(@targetRequestTime) && ((time() - @targetRequestTime) / 1000 < 60)) {
                 _store_duelOponent(@attacker, @target)
                 _store_duelOponent(@target, @attacker)
-                _reset_attackTime(@attacker, @target)
-                _reset_attackTime(@target, @attacker)
+                _reset_requestTime(@attacker, @target)
+                _reset_requestTime(@target, @attacker)
 
                 broadcast(_format(@attacker. ' and ' .@target. ' are now in a duel!', notification))
-            } else if(!is_numeric(@attackerAttackTime) || (time() - @attackerAttackTime) / 1000 > 30) {
-                _store_attackTime(@attacker, @target)
+            } else if(!is_numeric(@attackerRequestTime) || (time() - @attackerRequestTime) / 1000 > 30) {
+                _store_requestTime(@attacker, @target)
                 tmsg(@target, _format(@attacker. ' would like to duel, attack back if you accept.', 'notification'))
             }
             cancel()
