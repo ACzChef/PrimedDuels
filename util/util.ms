@@ -6,10 +6,10 @@ proc(_get_duelOponent, @player,
 )
 
 
-proc(get_attackTime, @attacker, @target,
-	return(import('aczchef.primedduels.time.attack.' .@attacker. '.' .@target)
+proc(_get_attackTime, @attacker, @target,
+	return(import('aczchef.primedduels.time.attack.' .@attacker. '.' .@target))
 )
-proc(store_attackTime, @attacker, @target,
+proc(_store_attackTime, @attacker, @target,
 	export('aczchef.primedduels.time.attack.' .@attacker. '.' .@target, time())
 )
 proc(_reset_attackTime, @attacker, @target,
